@@ -1,12 +1,14 @@
 '''
 统计一只股票在过去所有天的表现, 然后按照日期分组, 看具体到每一天的涨跌幅平均有多少.
 意义: 我可以知道历史上, 每个月的每一天平均是涨是跌, 从而可以在未来的交易中, 根据历史数据来预测未来的涨跌.
+
+注意: 有一段代码是用来过滤数据测试选举年的
 '''
 import yfinance
 import polars
 import plotly.express as px
 
-ticker = 'QQQ'
+ticker = 'SPY'
 
 pandas_df = yfinance.download(ticker)
 pandas_df.reset_index(inplace=True)
@@ -23,6 +25,11 @@ df = df.with_columns([
 df = df.with_columns([
     ((polars.col('aClose') - polars.col('pClose')) / polars.col('pClose') * 100).alias('change').fill_null(0),
 ])
+
+# election year filter
+df = df.filter(polars.col('date').dt.year() % 4 == 0)
+df = df.filter(polars.col('date').dt.year() < 2024)
+
 df = df.with_columns([
     (polars.col('date').dt.month().cast(polars.Int16) * 100 + polars.col('date').dt.day()).alias('monthDay'),
 ])

@@ -1,5 +1,7 @@
 '''
 统计一只股票在过去所有天的表现, 然后按照日期分组, 看具体到每一天上涨的有多少年, 下跌的有多少年
+
+注意: 有一段代码是用来过滤数据测试选举年的
 '''
 import yfinance
 import polars
@@ -25,6 +27,11 @@ df = df.with_columns([
     .otherwise(-1)
     .alias('winLose')
 ])
+
+# election year filter
+df = df.filter(polars.col('date').dt.year() % 4 == 0)
+df = df.filter(polars.col('date').dt.year() < 2024)
+
 df = df.with_columns([
     (polars.col('date').dt.month().cast(polars.Int16) * 100 + polars.col('date').dt.day()).alias('monthDay'),
 ])
