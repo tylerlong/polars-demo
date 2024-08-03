@@ -1,5 +1,6 @@
 import yfinance
 import polars
+import plotly.express as px
 
 pandas_df = yfinance.download('QQQ')
 pandas_df.reset_index(inplace=True)
@@ -32,3 +33,7 @@ df = df.with_columns([
 print(df.head())
 print(df.tail())
 df.write_csv('output.csv')
+
+fig = px.bar(df, x='monthDay', y='cumulative', title='Cumulative Change in QQQ')
+fig.update_layout(xaxis_title='MonthDay', yaxis_title='Profit (%)')
+fig.show()
